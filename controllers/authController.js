@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const { User } = require('../models');
 
-// Joi schemas
 const registerSchema =  Joi.object({
             name: Joi.string().required().messages({
                 'string.empty': 'Name cannot be empty',
@@ -35,50 +34,41 @@ const loginSchema = Joi.object({
     })
 })
 
-// Register controller
 exports.register = async (req, res) => {
   try {
-    // Validate request body
     const { error } = registerSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     const { email, password } = req.body;
-
-    // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(409).json({ error: 'User already exists' });
     }
-
-    // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.create({ email, password: hashedPassword });
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
-    console.error('Registration error:', err);
+    console.log('Registration error:', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 };
 
-// Login controller
 exports.login = async (req, res) => {
   try {
-    // Validate request body
+
     const { error } = loginSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     const { email, password } = req.body;
 
-    // Find user by email
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(401).json({ error: 'Invalid email or password' });
 
-    // Compare passwords
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid email or password' });
 
-    // Sign JWT
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
@@ -87,7 +77,7 @@ exports.login = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
-    console.error('Login error:', err);
+    console.log('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
   }
 };

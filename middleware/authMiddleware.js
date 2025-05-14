@@ -35,7 +35,7 @@ module.exports = async function (req, res, next) {
 
     next();
   } catch (err) {
-    console.error('Auth middleware error:', err);
+    console.log('Auth middleware error:', err);
     return res.status(500).json({ error: 'Server error during authorization' });
   }
 };
