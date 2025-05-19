@@ -4,8 +4,14 @@ const Joi = require('joi');
 const { User } = require('../models');
 
 const registerSchema =  Joi.object({
-            name: Joi.string().required().messages({
-                'string.empty': 'Name cannot be empty',
+            firstname: Joi.string().required().messages({
+                'string.empty': 'firstname cannot be empty',
+            }),
+            lastname: Joi.string().required().messages({
+                'string.empty': 'lastname cannot be empty',
+            }),
+            mobile: Joi.string().required().messages({
+                'string.empty': 'Mobile cannot be empty',
             }),
             email: Joi.string().email().required().messages({
                 'string.email': 'Email must be a valid email address',
@@ -39,7 +45,7 @@ exports.register = async (req, res) => {
     const { error } = registerSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
-    const { email, password } = req.body;
+    const { email, password ,firstname,lastname,mobile} = req.body;
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(409).json({ error: 'User already exists' });
